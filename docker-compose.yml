@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  php:
+    build: ./docker/php
+    container_name: php
+    working_dir: /app
+    volumes:
+      - .:/app
+    depends_on:
+      wait-for-db:
+        condition: service_completed_successfully
+
+  mysql:
+    image: mariadb
+    container_name: mysql
+    environment:
+      MARIADB_DATABASE: database
+      MARIADB_USER: root
+      MARIADB_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+
+  wait-for-db:
+    image: atkrad/wait4x
+    depends_on:
+      - mysql
+    command: tcp mysql:3306 -t 30s -i 250ms
